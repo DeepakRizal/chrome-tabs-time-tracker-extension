@@ -1,3 +1,5 @@
+import { getDataFromStorage, setItemToStorage } from "./storage.js";
+
 let timeSpent = {};
 let currentTab = null;
 let startTime = null;
@@ -18,32 +20,6 @@ async function logCurrentTime() {
     );
     await setItemToStorage("timeSpent", timeSpent);
   }
-}
-
-// function to set data to storage
-function setItemToStorage(key, value) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: value }, () => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
-// function to get data from storage
-function getDataFromStorage(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get([key], (result) => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-      } else {
-        resolve(result[key]);
-      }
-    });
-  });
 }
 
 //restore old
