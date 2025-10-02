@@ -8,20 +8,40 @@ const values = [];
 const data = await getDataFromStorage("timeSpent");
 
 if (data) {
-  Object.entries(data).forEach(([domain, time]) => {
-    labels.push(domain);
+  // Sort entries by time (descending)
+  const sortedEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
 
-    // Convert milliseconds to total minutes
+  // Set a threshold: 1% of total time or minimum 5 minutes
+  const totalTime = sortedEntries.reduce((sum, [_, time]) => sum + time, 0);
+  const threshold = Math.max(totalTime * 0.01, 3 * 60 * 1000); // 1% or 5 minutes
+
+  let othersTime = 0;
+
+  sortedEntries.forEach(([domain, time]) => {
     const totalMinutes = Math.floor(time / 1000 / 60);
 
-    // Or if you want total hours instead: const totalHours = time / 1000 / 3600;
-
-    values.push(totalMinutes); // Add number to values array
+    if (time >= threshold) {
+      labels.push(domain);
+      values.push(totalMinutes);
+    } else {
+      othersTime += totalMinutes;
+    }
   });
+
+  // Add "Others" category if there are small values
+  if (othersTime > 0) {
+    labels.push("Others");
+    values.push(othersTime);
+  }
 }
+
+const backgroundColor = labels.map(
+  (_, i) => `hsl(${(i * 40) % 360}, 70%, 60%)`
+);
 
 // Draw chart
 const ctx = document.getElementById("chart").getContext("2d");
+
 new Chart(ctx, {
   type: "pie",
   data: {
@@ -29,13 +49,7 @@ new Chart(ctx, {
     datasets: [
       {
         data: values,
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#8BC34A",
-          "#FF9800",
-        ],
+        backgroundColor: backgroundColor,
       },
     ],
   },
@@ -44,10 +58,15 @@ new Chart(ctx, {
       tooltip: {
         callbacks: {
           label: function (context) {
-            const value = context.parsed; // value from your values array
-            return `${context.label}: ${value} minutes`;
+            const value = context.parsed;
+            const hours = Math.floor(value / 60);
+            const minutes = value % 60;
+            return `${context.label}: ${hours}h ${minutes}m`;
           },
         },
+      },
+      legend: {
+        position: "right", // Move legend to the side for better visibility
       },
     },
   },
