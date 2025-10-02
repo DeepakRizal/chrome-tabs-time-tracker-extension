@@ -1,3 +1,4 @@
+let timeSpent = {};
 let currentTab = null;
 let startTime = null;
 
@@ -5,7 +6,15 @@ function logCurrentTime() {
   if (currentTab && startTime) {
     const duration = Date.now() - startTime;
 
-    console.log(`you have stayed in that tab for ${duration / 1000} seconds`);
+    const url = currentTab.url;
+
+    timeSpent[url] = (timeSpent[url] || 0) + duration;
+
+    console.log(
+      `Tab: ${currentTab.title} | Total Time: ${(timeSpent[url] / 1000).toFixed(
+        2
+      )}s`
+    );
   }
 }
 
@@ -13,7 +22,7 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
   logCurrentTime();
 
   chrome.tabs.get(activeInfo.tabId, (tab) => {
-    currentTab = { tabId: tab.id, title: tab.title };
+    currentTab = { tabId: tab.id, url: tab.url, title: tab.title };
     startTime = Date.now();
   });
 });
@@ -26,7 +35,10 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
   } else {
     // some window focused — get active tab there
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-      console.log(tabs);
+      if (tabs[0]) {
+        currentTab = { id: tabs[0].id, url: tabs[0].url, title: tabs[0].title };
+        startTime = Date.now();
+      }
     });
   }
 });

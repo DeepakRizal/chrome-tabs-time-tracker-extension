@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Browsers Tabs Time Tracker",
+  "name": "Chrome Tabs Time Tracker",
   "version": "1.0",
   "permissions": ["tabs", "storage", "idle"],
   "background": {
