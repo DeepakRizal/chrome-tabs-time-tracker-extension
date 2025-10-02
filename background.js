@@ -7,11 +7,12 @@ function logCurrentTime() {
     const duration = Date.now() - startTime;
 
     const url = currentTab.url;
+    const hostName = new URL(url).hostname;
 
-    timeSpent[url] = (timeSpent[url] || 0) + duration;
+    timeSpent[hostName] = (timeSpent[hostName] || 0) + duration;
 
     console.log(
-      `Tab: ${currentTab.title} | Total Time: ${(timeSpent[url] / 1000).toFixed(
+      `Tab: ${hostName} | Total Time: ${(timeSpent[hostName] / 1000).toFixed(
         2
       )}s`
     );
