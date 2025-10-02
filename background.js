@@ -2,12 +2,12 @@ let timeSpent = {};
 let currentTab = null;
 let startTime = null;
 
-function logCurrentTime() {
+async function logCurrentTime() {
   if (currentTab && startTime) {
     const duration = Date.now() - startTime;
 
     const url = currentTab.url;
-    const hostName = new URL(url).hostname;
+    const hostName = new URL(url).hostname.replace("www.", "");
 
     timeSpent[hostName] = (timeSpent[hostName] || 0) + duration;
 
@@ -16,8 +16,46 @@ function logCurrentTime() {
         2
       )}s`
     );
+    await setItemToStorage("timeSpent", timeSpent);
   }
 }
+
+// function to set data to storage
+function setItemToStorage(key, value) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: value }, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+// function to get data from storage
+function getDataFromStorage(key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([key], (result) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(result[key]);
+      }
+    });
+  });
+}
+
+//restore old
+(async function init() {
+  const result = await getDataFromStorage("timeSpent");
+
+  if (result) {
+    timeSpent = result;
+
+    console.log("Restored Time Spent: ", timeSpent);
+  }
+})();
 
 chrome.tabs.onActivated.addListener((activeInfo) => {
   logCurrentTime();
