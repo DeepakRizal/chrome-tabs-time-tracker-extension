@@ -1,5 +1,7 @@
 import { getTodaysKey, getDataFromStorage } from "./utils.js";
 
+const dateEle = document.querySelector(".date");
+
 // Arrays for chart
 const labels = [];
 const values = [];
@@ -9,7 +11,7 @@ const data = await getDataFromStorage("timeSpent");
 const today = getTodaysKey();
 const todaysData = data[today];
 
-console.log(todaysData, data);
+dateEle.textContent = today;
 
 if (todaysData) {
   // Sort entries by time (descending)
@@ -17,7 +19,7 @@ if (todaysData) {
 
   // Set a threshold: 1% of total time or minimum 5 minutes
   const totalTime = sortedEntries.reduce((sum, [_, time]) => sum + time, 0);
-  const threshold = Math.max(totalTime * 0.01, 1 * 60 * 1000); // 1% or 5 minutes
+  const threshold = Math.max(totalTime * 0.01, 3 * 60 * 1000); // 1% or 5 minutes
 
   let othersTime = 0;
 
