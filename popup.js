@@ -1,4 +1,4 @@
-import { getDataFromStorage } from "./storage.js";
+import { getTodaysKey, getDataFromStorage } from "./utils.js";
 
 // Arrays for chart
 const labels = [];
@@ -6,14 +6,18 @@ const values = [];
 
 // Fetch stored timeSpent
 const data = await getDataFromStorage("timeSpent");
+const today = getTodaysKey();
+const todaysData = data[today];
 
-if (data) {
+console.log(todaysData, data);
+
+if (todaysData) {
   // Sort entries by time (descending)
-  const sortedEntries = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  const sortedEntries = Object.entries(todaysData).sort((a, b) => b[1] - a[1]);
 
   // Set a threshold: 1% of total time or minimum 5 minutes
   const totalTime = sortedEntries.reduce((sum, [_, time]) => sum + time, 0);
-  const threshold = Math.max(totalTime * 0.01, 3 * 60 * 1000); // 1% or 5 minutes
+  const threshold = Math.max(totalTime * 0.01, 1 * 60 * 1000); // 1% or 5 minutes
 
   let othersTime = 0;
 

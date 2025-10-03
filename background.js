@@ -1,24 +1,42 @@
-import { getDataFromStorage, setItemToStorage } from "./storage.js";
+import { getDataFromStorage, setItemToStorage, getTodaysKey } from "./utils.js";
 
 let timeSpent = {};
 let currentTab = null;
 let startTime = null;
+
+function getHostnameSafely(url) {
+  try {
+    // Try to create URL object
+    const parsed = new URL(url);
+    return parsed.hostname.replace("www.", "");
+  } catch (e) {
+    // If invalid (chrome://, about:blank etc.)
+    return null;
+  }
+}
 
 async function logCurrentTime() {
   if (currentTab && startTime) {
     const duration = Date.now() - startTime;
 
     const url = currentTab.url;
-    const hostName = new URL(url).hostname.replace("www.", "");
+    const hostName = getHostnameSafely(url);
 
-    timeSpent[hostName] = (timeSpent[hostName] || 0) + duration;
+    if (hostName) {
+      const todayKey = getTodaysKey();
 
-    console.log(
-      `Tab: ${hostName} | Total Time: ${(timeSpent[hostName] / 1000).toFixed(
-        2
-      )}s`
-    );
-    await setItemToStorage("timeSpent", timeSpent);
+      if (!timeSpent[todayKey]) timeSpent[todayKey] = {};
+      timeSpent[todayKey][hostName] =
+        (timeSpent[todayKey][hostName] || 0) + duration;
+
+      console.log(
+        `Tab: ${hostName} | Total Time: ${(
+          timeSpent[todayKey][hostName] / 1000
+        ).toFixed(2)}s`
+      );
+
+      await setItemToStorage("timeSpent", timeSpent);
+    }
   }
 }
 

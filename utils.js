@@ -23,3 +23,10 @@ export function getDataFromStorage(key) {
     });
   });
 }
+
+// function to get today's date
+export function getTodaysKey() {
+  const today = new Date();
+
+  return today.toISOString().split("T")[0];
+}
