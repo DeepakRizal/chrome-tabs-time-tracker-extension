@@ -75,3 +75,11 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
     });
   }
 });
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (currentTab && currentTab.id === tabId) {
+    logCurrentTime();
+  }
+  currentTab = null;
+  startTime = null;
+});
